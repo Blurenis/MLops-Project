@@ -19,7 +19,7 @@ Project root:
 These tests add <project_root>/src to sys.path explicitly.
 """
 
-from __future__ import annotations
+from _future_ import annotations
 
 import json
 import subprocess
@@ -30,7 +30,7 @@ import pandas as pd
 import pytest
 
 # Make src importable without installing as a package
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(_file_).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_DIR))
 
@@ -73,7 +73,7 @@ NORMALIZED_HEADERS = [
 
 
 def _write_tab_csv(path: Path, rows: list[list[str]]) -> None:
-    """Write a tab-separated file with RAW_HEADERS and `rows`."""
+    """Write a tab-separated file with RAW_HEADERS and rows."""
     with path.open("w", encoding="utf-8") as f:
         f.write("\t".join(RAW_HEADERS) + "\n")
         for r in rows:
