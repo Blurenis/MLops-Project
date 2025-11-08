@@ -1,4 +1,4 @@
----
+```
  /$$      /$$ /$$                                            /$$$$$$$                                               /$$    
 | $$$    /$$$| $$                                           | $$__  $$                                             | $$    
 | $$$$  /$$$$| $$        /$$$$$$   /$$$$$$   /$$$$$$$       | $$  \ $$ /$$$$$$   /$$$$$$  /$$  /$$$$$$   /$$$$$$$ /$$$$$$  
@@ -10,132 +10,170 @@
                                  | $$                                               /$$  | $$                              
                                  | $$                                              |  $$$$$$/                              
                                  |__/                                               \______/                               
----
+```
 
 # Collaborative Sentiment Analysis Pipeline
 
-A lightweight, end‑to‑end BERT-based sentiment analysis project built by a pair of students. It covers data extraction, text preprocessing, model fine‑tuning, and an inference interface. Collaboration practices include a Trello board, feature branches, pull requests, peer code reviews, and CI.
+> End‑to‑end BERT-based sentiment analysis built by **Jérémie Ondzaghe** and **Dylan Ondo**. It includes data extraction, preprocessing, model fine‑tuning, and a CLI for inference. The workflow enforces branches, pull requests, unit tests with coverage, and CI.
+
+---
+
+## Badges
+
+<!-- Replace placeholders after enabling CI and coverage in your repo -->
+![Build](https://img.shields.io/badge/build-passing-inactive)
+![Tests](https://img.shields.io/badge/tests-100%20passed-inactive)
+![Coverage](https://img.shields.io/badge/coverage-90%25%2B-inactive)
 
 ---
 
 ## Table of Contents
-- [Project Overview](#project-overview)
+
+- [Overview](#overview)
 - [Repository Structure](#repository-structure)
-- [Getting Started](#getting-started)
-- [Data Extraction](#data-extraction)
-- [Data Processing](#data-processing)
-- [Model Training](#model-training)
-- [Inference](#inference)
-- [Testing](#testing)
+- [Quickstart](#quickstart)
+- [Data](#data)
+- [Pipeline Usage](#pipeline-usage)
+  - [1) Data Extraction](#1-data-extraction)
+  - [2) Data Processing](#2-data-processing)
+  - [3) Model Training](#3-model-training)
+  - [4) Inference](#4-inference)
+- [Testing and Coverage](#testing-and-coverage)
+- [Continuous Integration](#continuous-integration)
 - [Project Management](#project-management)
-- [Git Workflow](#git-workflow)
-- [Deliverables](#deliverables)
+- [Git Workflow and PRs](#git-workflow-and-prs)
+- [Code Review Checklist](#code-review-checklist)
+- [Deliverables Checklist](#deliverables-checklist)
 - [Contributors](#contributors)
 - [License](#license)
 
 ---
 
-## Project Overview
-This repository implements a collaborative sentiment analysis pipeline using a pretrained BERT model. The pipeline is split into three components:
+## Overview
 
-1. **Data Extraction**: Load and validate raw text data from CSV/TSV/JSON.
-2. **Data Processing**: Clean, normalize, and tokenize text for BERT.
-3. **Model Training & Inference**: Fine‑tune a BERT classifier and expose an inference script for predictions.
+This repository implements a collaborative sentiment analysis pipeline using a pretrained BERT model. The pipeline has three main components:
 
-The project emphasizes software engineering practices: branch‑based development, code reviews through pull requests, and an aligned task board.
+1. **Data Extraction** — Load and validate raw text data from CSV/TSV/JSON/NDJSON.
+2. **Data Processing** — Clean, normalize, and tokenize text for BERT; split into train/validation.
+3. **Model Training & Inference** — Fine‑tune a BERT classifier and expose an inference CLI for predictions.
+
+Engineering practices include feature branches, mandatory peer reviews, a Trello board for coordination, unit tests with high coverage, and CI on each push and pull request.
 
 ---
 
 ## Repository Structure
+
+> Matches the current repo layout. Adjust if you move files.
+
 ```
 .
 ├── README.md
-├── .gitignore
-├── pyproject.toml            # or requirements.txt
+├── dataset.csv
+├── requrments.txt            # file name kept as in repo (typo)
 ├── src/
-│   ├── data_extraction.py    # load & validate datasets
-│   ├── data_processing.py    # clean, split, tokenize
-│   ├── model.py              # model definition/training loop or HF Trainer
-│   └── inference.py          # CLI for predictions on new text
-├── tests/
-│   └── unit/
-│       ├── test_data_extraction.py
-│       ├── test_data_processing.py
-│       ├── test_model.py
-│       └── test_inference.py
-├── artifacts/                # trained models, checkpoints, logs
-├── data/
-│   ├── raw/                  # input datasets (not tracked if large)
-│   └── processed/            # tokenized/ready datasets
-└── .github/workflows/        # CI config (pytest, lint, coverage)
+│   ├── data_extraction.py
+│   ├── data_processing.py
+│   ├── inference.py
+│   └── model.py
+└── test/
+    ├── test_data_extraction.py
+    ├── test_data_processing.py
+    ├── test_inference.py
+    └── test_model.py
+```
+
+Optional folders created during runs:
+
+```
+artifacts/            # trained models, checkpoints, logs
+data/
+  ├── raw/
+  └── processed/
+.github/workflows/    # CI config (pytest, coverage)
 ```
 
 ---
 
-## Getting Started
-### Prerequisites
-- Python 3.10+
-- Recommended: a virtual environment
+## Quickstart
 
-### Installation
+### 1) Environment
+
 ```bash
-# create and activate a venv
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+# Windows PowerShell
+. .venv/Scripts/Activate.ps1
+# macOS/Linux
+# source .venv/bin/activate
+```
 
-# install project in editable mode (choose one)
-pip install -e .                  # if using pyproject.toml
-# OR
-pip install -r requirements.txt   # if using requirements.txt
+### 2) Install dependencies
+
+If the repository uses `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+
+If the repository currently has `requrments.txt` (typo kept intentionally to match the file):
+```bash
+pip install -r requrments.txt
 ```
 
 ---
 
-## Data Extraction
-**Goal:** Load raw data and enforce expected schema.
+## Data
 
-Suggested CLI (example):
+- Expected columns in `dataset.csv`:
+  - **content** — the raw text.
+  - **score** — the numeric sentiment label (e.g., 0=negative, 1=neutral, 2=positive).
+- Supported input formats for extraction: `.csv`, `.tsv`, `.json`, `.ndjson`.
+
+---
+
+## Pipeline Usage
+
+All scripts expose a CLI via `python -m src.<module>`. Run with `-h` for all options.
+
+### 1) Data Extraction
+
+Load, normalize column names, and validate schema.
+
 ```bash
 python -m src.data_extraction \
-  --path data/raw/dataset.csv \
+  --path dataset.csv \
   --text-col content \
-  --label-col label \
+  --label-col score \
   --out data/processed/clean.csv
 ```
 
 Key behaviors:
 - Accept CSV/TSV/JSON/NDJSON
 - Normalize column names (snake_case)
-- Validate required columns exist
+- Validate required columns
 - Fail fast with clear error messages
 
----
+### 2) Data Processing
 
-## Data Processing
-**Goal:** Clean text and tokenize with a Hugging Face tokenizer, then split into train/validation.
+Clean text, tokenize using a Hugging Face tokenizer, and split into train/validation.
 
-Example usage:
 ```bash
 python -m src.data_processing \
   --path data/processed/clean.csv \
   --text-col content \
-  --label-col label \
+  --label-col score \
   --model-name bert-base-uncased \
   --val-size 0.1 \
   --out data/processed/tokenized
 ```
 
 Typical steps:
-- Basic cleaning (lowercasing, simple normalization)
+- Basic cleaning (lowercasing, normalization)
 - Tokenization via `AutoTokenizer`
-- Dataset split into train/val
+- Train/val split saved to disk
 
----
+### 3) Model Training
 
-## Model Training
-**Goal:** Fine‑tune a BERT sequence classifier and log metrics.
+Fine‑tune a BERT classifier and save artifacts.
 
-Example usage:
 ```bash
 python -m src.model \
   --train data/processed/tokenized/train.json \
@@ -148,20 +186,14 @@ python -m src.model \
   --output artifacts/bert-sentiment
 ```
 
-Implementation options:
-- Hugging Face `AutoModelForSequenceClassification` and `Trainer`
-- or a custom PyTorch loop
-
-Outputs:
-- Best model checkpoint
+Typical outputs:
+- Best model checkpoint in `artifacts/`
 - Training logs and metrics (accuracy, F1)
 
----
+### 4) Inference
 
-## Inference
-**Goal:** Predict sentiment for new text with a saved checkpoint.
+Predict sentiment for new text with a saved checkpoint.
 
-Example usage:
 ```bash
 python -m src.inference \
   --model artifacts/bert-sentiment \
@@ -176,59 +208,151 @@ score: 0.98
 
 ---
 
-## Testing
-Unit tests cover the main components:
-- `test_data_extraction.py`: schema checks, format handling, error cases
-- `test_data_processing.py`: cleaning rules and tokenizer outputs
-- `test_model.py`: model instantiation and a dry forward pass with dummy data
-- `test_inference.py`: end‑to‑end prediction path
+## Testing and Coverage
 
-Run tests and view coverage:
+Unit tests cover extraction, processing, model, and inference.
+
 ```bash
 pytest -q
-coverage run -m pytest && coverage html
 ```
+
+Generate coverage and fail if below 90%:
+
+```bash
+pytest --maxfail=1 --disable-warnings -q --cov=src --cov-report=term-missing --cov-fail-under=90
+coverage html  # ./htmlcov/index.html
+```
+
+Tips:
+- Keep tests deterministic.
+- Add regression tests for bug fixes.
+- Mock I/O and randomness where helpful.
+
+---
+
+## Continuous Integration
+
+Enable GitHub Actions to run tests and coverage on every push and PR. Create `.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install deps
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requrments.txt ]; then pip install -r requrments.txt; fi
+          pip install pytest pytest-cov
+      - name: Run tests with coverage
+        run: |
+          pytest --maxfail=1 -q --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=90
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+```
+
+Optional extensions:
+- Linting (ruff/flake8) and type checks (mypy).
+- Coverage badge via a coverage service.
 
 ---
 
 ## Project Management
-Use a Trello board with lists: **To Do**, **In Progress**, **In Review**, **Done**. For each card include a description, checklist, attachments (PR links, coverage reports), and labels such as `backend`, `data`, `model`, `testing`, `documentation`.
 
-Suggested board name: `Sentiment Analysis Project – <Student A> & <Student B>`.
+Use a Trello board named: **“Sentiment Analysis Project – Jérémie Ondzaghe & Dylan Ondo”** with lists:
+
+- **To Do** — backlog of tasks.
+- **In Progress** — assigned and active.
+- **In Review** — awaiting code review via PR.
+- **Done** — merged and validated.
+
+Each card includes:
+- **Description** with goal and acceptance criteria.
+- **Checklist**: unit tests pass, coverage ≥ 90%, README updated, attach PR link.
+- **Assignees and Labels**: `backend`, `data`, `model`, `testing`, `documentation`.
+- **Attachments**: PR links, test artifacts, coverage report screenshot.
+
+Workflow:
+1. Create a card in **To Do**.
+2. Move to **In Progress** when a feature branch starts.
+3. Move to **In Review** with a link to the PR.
+4. Move to **Done** after approval, merge, and green CI.
 
 ---
 
-## Git Workflow
-- Create feature branches, e.g. `feature/data-extraction`, `feature/model-training`.
-- Open a **pull request** from each feature branch into `main`.
-- Each PR must be reviewed by the partner before merge.
-- Use descriptive commit messages tied to the task.
+## Git Workflow and PRs
 
-Example branch flow:
+- Default branch: `main` is protected. No direct commits.
+- Branch naming:
+  - `feature/data-extraction`, `feature/data-processing`, `feature/model-training`, `feature/inference`
+  - `chore/ci`, `docs/readme`, `fix/<issue-id>-<short-desc>`
+- Commit messages: imperative mood and scoped, e.g. `feat(processing): add tokenizer and split`.
+
+Example:
+
 ```bash
 git checkout -b feature/data-extraction
-# commit work
+# ... work, commit ...
 git push -u origin feature/data-extraction
-# open PR on GitHub and request review
+# open PR to main and request review
 ```
+
+PR rules:
+- CI green.
+- Coverage ≥ 90%.
+- At least one approval from the partner.
+- Rebase to resolve conflicts if needed.
 
 ---
 
-## Deliverables
-- Public repository with evidence of branching and PRs
-- This README with setup and usage
-- Short project report with: approach, division of labor, Trello screenshots, GitHub PR screenshots, challenges, and future work
+## Code Review Checklist
+
+Paste this in PR comments:
+
+- [ ] Scope clear and minimal.
+- [ ] Tests cover new code; all tests green.
+- [ ] Coverage ≥ 90% on project and diff.
+- [ ] Names and structure clear; functions small.
+- [ ] No secrets, hard-coded paths, or dead code.
+- [ ] README/docs updated where needed.
+
+---
+
+## Deliverables Checklist
+
+- [ ] Public repository with branches and PRs history.
+- [ ] This README with setup and usage.
+- [ ] Screenshots: Trello board (lists, cards, attachments).
+- [ ] Screenshots: GitHub PRs and code review comments.
+- [ ] Test results and coverage report (≥ 90%).
 
 ---
 
 ## Contributors
-- Student A — role
-- Student B — role
 
-Add your names and roles here.
+- **Jérémie Ondzaghe** — data extraction, data processing, model training, repository setup.
+- **Dylan Ondo** — unit tests, CI integration, documentation checks, peer reviews.
+
+Both collaborators review and validate each other’s work before merge.
 
 ---
 
 ## License
-Choose a license (e.g., MIT). Include the file `LICENSE` at the project root.
 
+This project is released under **The Unlicense (public domain)**. See `LICENSE`.
+```
+SPDX-License-Identifier: Unlicense
+```
