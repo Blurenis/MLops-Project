@@ -16,7 +16,8 @@ RUN apt-get update && \
 
 # Copy requirements and install dependencies into a specific location (--user)
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN pip install --user --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --user --no-cache-dir -r requirements.txt
 
 # ==========================================
 # Stage 2: Runtime
