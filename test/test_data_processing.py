@@ -28,7 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_DIR))
 
-from data_processing import (  # noqa: E402
+from src.data_processing import (  # noqa: E402
     clean_text,
     preprocess_dataframe,
     tokenize_texts,

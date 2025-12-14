@@ -19,7 +19,7 @@ Project root:
 These tests add <project_root>/src to sys.path explicitly.
 """
 
-from _future_ import annotations
+from __future__ import annotations
 
 import json
 import subprocess

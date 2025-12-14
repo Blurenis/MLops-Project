@@ -39,4 +39,5 @@ jobs:
     # 5. Run Tests [cite: 27]
     - name: Test with pytest
       run: |
-        pytest
+        # python -m adds the current folder to the path, fixing the 'src' error
+        python -m pytest
