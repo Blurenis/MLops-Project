@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # Service 1: The Python Application
+  # ==========================================
+  sentiment-app:
+    build:
+      context: .
+      target: runtime
+    container_name: sentiment-pipeline
+    
+    depends_on:
+      - log-store
+
+    environment:
+      - LOG_DB_HOST=log-store
+      - LOG_DB_PORT=6379
+      - MODEL_DIR=/app/artifacts
+
+    volumes:
+      # ---------------------------------------------------------
+      # FIXED: We REMOVED the "./data" mapping.
+      # Now the container uses the dataset we copied into the image.
+      # ---------------------------------------------------------
+
+      # We KEEP the artifacts mapping so you can get the results back
+      - ./artifacts:/app/artifacts:rw
+
+    # Default command
+    command: ["-m", "src.inference", "--help"]
+
+  # ==========================================
+  # Service 2: Database (Simulated for Logs)
+  # ==========================================
+  log-store:
+    image: redis:alpine
+    container_name: sentiment-logs
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
