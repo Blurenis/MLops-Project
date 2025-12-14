@@ -34,7 +34,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_DIR))
 
-from data_extraction import (  # noqa: E402
+from src.data_extraction import (  # noqa: E402
     DataExtractionError,
     load_raw_data,
     detect_format,
